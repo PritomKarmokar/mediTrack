@@ -24,20 +24,44 @@ DJANGO_APPS = [
 
 # Add third party apps here
 THIRD_PARTY_APPS = [
+    "corsheaders",
     "rest_framework",
-]
+]    
 
 # Add in house project apps here
 PROJECT_APPS = [
-    
+    "patients",
 ]
 
 # Installed apps
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + PROJECT_APPS
 
+CORS_ALLOWED_ORIGINS = [
+    "http://127.0.0.1:8000", # Change it based on your port
+]
+
+CORS_ALLOW_METHODS = (
+    "DELETE",
+    "GET",
+    "OPTIONS",
+    "PATCH",
+    "POST",
+    "PUT",
+)
+
+CORS_ALLOW_HEADERS = (
+    "accept",
+    "authorization",
+    "content-type",
+    "user-agent",
+    "x-csrftoken",
+    "x-requested-with",
+)
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    "corsheaders.middleware.CorsMiddleware",
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
