@@ -47,29 +47,31 @@ class PatientsRetrieveUpdateDeleteAPIView(APIView):
     serializer_class = PatientSerializer
 
     def get(self, request: Request, patient_id: int) -> Response:
-        patient = Patient.objects.get(id=patient_id)
+        patient = Patient.get_active_patient_info(id=patient_id)
 
-        if patient:
-            serializer = self.serializer_class(data=patient)
+        if patient is None:
             response = {
-                "message": f"Patient with the Id {patient_id} retrieved successfully",
-                "data": serializer.data
+                "message": f"Patient with the following Id {patient_id} does not exist"
             }
-            return Response(data=response, status=status.HTTP_200_OK)
-        
+            return Response(data=response, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = self.serializer_class(instance=patient)
         response = {
-            "message": f"Patient with the following Id {patient_id} does not exist"
+            "message": f"Patient with the Id {patient_id} retrieved successfully",
+            "data": serializer.data
         }
-        return Response(data=response, status=status.HTTP_404_NOT_FOUND)
+        return Response(data=response, status=status.HTTP_200_OK)
+        
+        
     
     def patch(self, request: Request, patient_id: int) -> Response:
         first_name = request.data.get("first_name", None)
         last_name = request.data.get("last_name", None)
         blood_group = request.data.get("blood_group", None)
 
-        patient = Patient.objects.get(id=patient_id)
+        patient = Patient.get_active_patient_info(id=patient_id)
 
-        if not patient:
+        if patient is None:
             respone = {
                 "message": f"Patient with the following Id {patient_id} doesn't exist"
             }
@@ -88,7 +90,13 @@ class PatientsRetrieveUpdateDeleteAPIView(APIView):
             return Response(data=respone, status=status.HTTP_200_OK)
         
     def delete(self, request: Request, patient_id: int) -> Response:
-        patient = Patient.objects.get(id=patient_id)
+        patient = Patient.get_active_patient_info(id=patient_id)
+        if patient is None:
+            respone = {
+                "message": f"Patient with the following Id {patient_id} doesn't exist"
+            }
+            return Response(data=respone, status=status.HTTP_404_NOT_FOUND)
+        
         patient.is_active = False
         patient.deleted_at = timezone.now()
         patient.save()

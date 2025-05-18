@@ -1,4 +1,7 @@
+from __future__ import annotations
+
 import logging
+from typing import Optional
 
 from django.db import models
 from django.utils import timezone
@@ -16,7 +19,7 @@ class Patient(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     deleted_at = models.DateTimeField(null=True, blank=True)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.first_name
     
     class Meta:
@@ -50,3 +53,22 @@ class Patient(models.Model):
                 }
             )
             return False
+    
+    @classmethod
+    def get_active_patient_info(
+            cls, 
+            id: str
+    ) -> Optional[Patient]:
+        try:
+            return cls.objects.get(id=id, is_active=True)
+        except cls.DoesNotExist:
+            logger.error({
+                "message": "Patient info doesn't exist"
+            })
+            return None
+        except Exception as e:
+            logger.error({
+                "message": "Error occurred while fetching patient info",
+                "errors": repr(e)
+            })
+            return None
