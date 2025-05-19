@@ -37,7 +37,8 @@ PROJECT_APPS = [
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + PROJECT_APPS
 
 CORS_ALLOWED_ORIGINS = [
-    "http://127.0.0.1:8000", # Change it based on your port
+    "http://localhost:5173", 
+    "http://127.0.0.1:5173", # Change it based on fronted
 ]
 
 CORS_ALLOW_METHODS = (

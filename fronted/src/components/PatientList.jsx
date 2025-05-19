@@ -1,20 +1,20 @@
 import { useEffect, useState } from "react";
 import { getpatient } from "../services/ApiService";
+import axios from "axios";
 
 const PatientList = () => {
     const [patients, setPatients] = useState([])
 
     useEffect(() => {
-        let mount = true
 
-        getpatient().then(res => {
-            if (mount) {
-                setPatients(res)
-            }
-        })
-        return () => {
-            mount = false
-        }
+        axios.get("http://127.0.0.1:8000/patients/")
+            .then(res => {
+                console.log(res.data)
+                setPatients(res.data)
+            })
+            .catch(err => {
+                console.error("Error fetching info:", err)
+            })
     }, [])
 
     return (
