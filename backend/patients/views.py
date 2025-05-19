@@ -12,7 +12,7 @@ class PatientsListCreateAPIView(APIView):
     serializer_class = PatientSerializer
 
     def get(self, request: Request) -> Response:
-        patients = Patient.objects.all()
+        patients = Patient.objects.filter(is_active=True)
         
         if len(patients) <= 0:
             response = {
