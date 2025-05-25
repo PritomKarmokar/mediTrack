@@ -1,74 +1,110 @@
 import { useEffect, useState } from "react";
-import { getpatient } from "../services/ApiService";
-import AddPatient from "./AddPatient";
 import axios from "axios";
+import { AddPatient } from "./AddOrUpdatePatient.jsx";
 
-const PatientList = () => {
-    const [patients, setPatients] = useState([])
-    const [showAddPatient, setShowAddPatient] = useState(false)
+export function PatientList() {
+    const [patients, setPatients] = useState([]);
+    const [showAddPatient, setShowAddPatient] = useState(false);
+    const [editPatient, setEditPatient] = useState(null);
 
     useEffect(() => {
+        fetchPatients();
+    }, []);
 
-        axios.get("http://127.0.0.1:8000/patients/")
-            .then(res => {
-                console.log(res.data)
-                setPatients(res.data.data)
-            })
-            .catch(err => {
-                console.error("Error fetching info:", err)
-            })
-    }, [])
+    const fetchPatients = async () => {
+        try {
+            const response = await axios.get("http://localhost:8000/patients/");
+            // Adjust this if your API returns flat list directly
+            setPatients(response.data.data || response.data);
+        } catch (error) {
+            console.error("Failed to fetch patients:", error);
+        }
+    };
+
+    const handleDeleteBtn = async (id) => {
+        try {
+            await axios.delete(`http://localhost:8000/patients/${id}/`);
+            setPatients(patients.filter(p => p.id !== id));
+        } catch (error) {
+            console.error("Failed to delete patient:", error);
+        }
+    };
 
     const handleCancelBtn = () => {
-        setShowAddPatient(false)
-
-        axios.get("http://127.0.0.1:8000/patients/")
-            .then(res => {
-                console.log("Response from the api:", res)
-                setPatients(res.data.data)
-            })
-    }
-
-    const handleDeleteBtn = (id) => {
-        axios.delete("http://127.0.0.1:8000/patients/" + id + "/")
-            .then(res => {
-                console.log(res.data)
-                setPatients(patients.filter(p => p.id !== id))
-            })
-    }
+        setShowAddPatient(false);
+        setEditPatient(null);
+        fetchPatients();
+    };
 
     return (
         <div className="container">
-            <h3>Patient List</h3>
+            <h2>Patients Info</h2>
+
             <table className="table table-striped table-hover table-bordered">
                 <thead className="table-dark">
                     <tr>
-                        <th scope="col">First Name</th>
-                        <th scope="col">Last Name</th>
-                        <th scope="col">Blood Group</th>
-                        <th scope="col">Action</th>
+                        <th>First Name</th>
+                        <th>Last Name</th>
+                        <th>Blood Group</th>
+                        <th>Action</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {patients.map(res =>
-                        <tr key={res.id}>
-                            <td>{res.first_name}</td>
-                            <td>{res.last_name}</td>
-                            <td>{res.blood_group}</td>
-                            <td>
-                                <button className="btn btn-primary m-2" onClick={() => { }}>Edit</button>
-                                <button className="btn btn-danger" onClick={() => { handleDeleteBtn(res.id) }}>Delete</button>
-                            </td>
+                    {patients.length === 0 ? (
+                        <tr>
+                            <td colSpan="4" className="text-center">No patients found.</td>
                         </tr>
+                    ) : (
+                        patients.map(patient => (
+                            <tr key={patient.id}>
+                                <td>{patient.first_name}</td>
+                                <td>{patient.last_name}</td>
+                                <td>{patient.blood_group}</td>
+                                <td>
+                                    <button
+                                        className="btn btn-primary m-2"
+                                        onClick={() => {
+                                            setEditPatient(patient);
+                                            setShowAddPatient(true);
+                                        }}
+                                    >
+                                        Update
+                                    </button>
+                                    <button
+                                        className="btn btn-danger"
+                                        onClick={() => handleDeleteBtn(patient.id)}
+                                    >
+                                        Delete
+                                    </button>
+                                </td>
+                            </tr>
+                        ))
                     )}
                 </tbody>
             </table>
-            <br />
-            <button className="btn btn-success" onClick={() => setShowAddPatient(true)}>Add New Patient</button>
-            <br></br>
-            <br></br>
-            {showAddPatient && <AddPatient handleCancelBtn={handleCancelBtn} />}
-        </div >
-    )
+
+            {!editPatient && (
+                <button
+                    className="btn btn-success"
+                    onClick={() => {
+                        setEditPatient(null);
+                        setShowAddPatient(true);
+                    }}
+                >
+                    Add New Patient
+                </button>
+            )}
+
+
+            <br /><br />
+
+            {showAddPatient && (
+                <AddPatient
+                    handleCancelBtn={handleCancelBtn}
+                    refreshPatients={fetchPatients}
+                    editPatient={editPatient}
+                />
+            )}
+        </div>
+    );
 }
-export default PatientList
