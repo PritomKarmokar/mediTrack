@@ -1,40 +1,73 @@
 import axios from "axios";
-import { useState } from "react";
+import {useState} from "react";
 
-const AddPatient = ({ handleCancelBtn }) => {
-    const [first_name, setFirstName] = useState('')
-    const [last_name, setLastName] = useState('')
-    const [blood_group, setBloodGroup] = useState('')
+export function AddPatient({handleCancelBtn, refreshPatients}) {
+    const [firstName, setFirstName] = useState('')
+    const [lastName, setLastName] = useState('')
+    const [bloodGroup, setBloodGroup] = useState('')
 
-    const handleAddSubmit = async e => {
+    const handleAddSubmit = async (e) => {
         e.preventDefault()
-        console.log(first_name, last_name, blood_group)
-        const res = await axios.post("http://127.0.0.1:8000/patients/", { first_name, last_name, blood_group })
-        console.log(res.data)
-        setFirstName('')
-        setLastName('')
-        setBloodGroup('')
+        console.log(`firstName: ${firstName} lastName: ${lastName} bloodGroup: ${bloodGroup}`)
+        // const response = await axios.post('http://localhost:8000/patients/', {
+        //     first_name: firstName,
+        //     last_name: lastName,
+        //     blood_group: bloodGroup
+        // })
+        // console.log(response)
+        // setFirstName('')
+        // setLastName('')
+        // setBloodGroup('')
+        axios.post('http://localhost:8000/patients/', {
+            first_name: firstName,
+            last_name: lastName,
+            blood_group: bloodGroup
+        })
+            .then(response =>{
+                console.log(response)
+                refreshPatients()
+                handleCancelBtn()
+            })
+            .catch(error =>{
+                console.log(error)
+            })
     }
-    return (
+
+    // function validateForm(obj) {
+    //     let val = obj.target.value
+    //     if(val.length <= 0){
+    //         console.log("empty values cannot be submitted")
+    //     }
+    //     return true
+    // }
+
+    return(
         <>
             <form onSubmit={handleAddSubmit}>
                 <div className="mb-3">
-                    <label htmlFor="first_name" className="form-label">First Name</label>
-                    <input type="text" className="form-control" id="first_name" value={first_name} onChange={e => setFirstName(e.target.value)}></input>
+                    <label htmlFor="firstName" className="form-label">First Name</label>
+                    <input type="text" className="form-control" id="firstName"
+                           value={firstName}
+                           onChange={(e) => setFirstName(e.target.value)}
+                    />
+                    <div className="mb-3">
+                        <label htmlFor="lastName" className="form-label">Last Name</label>
+                        <input type="text" className="form-control" id="lastName"
+                               value={lastName}
+                               onChange={(e) => setLastName(e.target.value)}
+                        />
+                    </div>
+                    <div className="mb-3">
+                        <label htmlFor="bloodGroup" className="form-label">Blood Group</label>
+                        <input type="text" className="form-control" id="bloodGroup"
+                               value={bloodGroup}
+                               onChange={(e) => setBloodGroup(e.target.value)}
+                        />
+                    </div>
+                    <button type="submit" className="btn btn-primary">Add</button>
+                    <button type="button" className="btn btn-secondary" onClick={handleCancelBtn}> Cancel</button>
                 </div>
-                <div className="mb-3">
-                    <label htmlFor="last_name" className="form-label">Last Name</label>
-                    <input type="text" className="form-control" id="last_name" value={last_name} onChange={e => setLastName(e.target.value)}></input>
-                </div>
-                <div className="mb-3">
-                    <label htmlFor="blood_group" className="form-label">Blood Group</label>
-                    <input type="text" className="form-control" id="blood_group" value={blood_group} onChange={e => setBloodGroup(e.target.value)}></input>
-                </div>
-                <button type="submit" className="btn btn-primary m-2">Add</button>
-                <button type="button" className="btn btn-secondary" onClick={handleCancelBtn}>Cancel</button>
             </form>
         </>
     )
 }
-
-export default AddPatient

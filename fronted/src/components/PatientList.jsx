@@ -1,45 +1,33 @@
-import { useEffect, useState } from "react";
-import { getpatient } from "../services/ApiService";
-import AddPatient from "./AddPatient";
+import {useEffect, useState} from "react";
 import axios from "axios";
+import {AddPatient} from "./AddPatient.jsx";
 
-const PatientList = () => {
+export function PatientList() {
     const [patients, setPatients] = useState([])
     const [showAddPatient, setShowAddPatient] = useState(false)
 
+    const fetchPatients = () =>{
+        axios.get("http://localhost:8000/patients/")
+            .then(response => {
+                console.log(response.data)
+                let patientsData = response.data
+                setPatients(patientsData.data)
+            })
+            .catch(error =>{
+                console.log(error)
+            })
+    }
     useEffect(() => {
+        fetchPatients()
+    },[])
 
-        axios.get("http://127.0.0.1:8000/patients/")
-            .then(res => {
-                console.log(res.data)
-                setPatients(res.data.data)
-            })
-            .catch(err => {
-                console.error("Error fetching info:", err)
-            })
-    }, [])
-
-    const handleCancelBtn = () => {
+    const handleCancelBtn = () =>{
         setShowAddPatient(false)
-
-        axios.get("http://127.0.0.1:8000/patients/")
-            .then(res => {
-                console.log("Response from the api:", res)
-                setPatients(res.data.data)
-            })
+        fetchPatients()
     }
-
-    const handleDeleteBtn = (id) => {
-        axios.delete("http://127.0.0.1:8000/patients/" + id + "/")
-            .then(res => {
-                console.log(res.data)
-                setPatients(patients.filter(p => p.id !== id))
-            })
-    }
-
     return (
         <div className="container">
-            <h3>Patient List</h3>
+            <h2>Patients Info</h2>
             <table className="table table-striped table-hover table-bordered">
                 <thead className="table-dark">
                     <tr>
@@ -50,25 +38,24 @@ const PatientList = () => {
                     </tr>
                 </thead>
                 <tbody>
-                    {patients.map(res =>
-                        <tr key={res.id}>
-                            <td>{res.first_name}</td>
-                            <td>{res.last_name}</td>
-                            <td>{res.blood_group}</td>
-                            <td>
-                                <button className="btn btn-primary m-2" onClick={() => { }}>Edit</button>
-                                <button className="btn btn-danger" onClick={() => { handleDeleteBtn(res.id) }}>Delete</button>
-                            </td>
-                        </tr>
-                    )}
+                {patients.map(patient => (
+                    <tr key={patient.id}>
+                        <td>{patient.first_name}</td>
+                        <td>{patient.last_name}</td>
+                        <td>{patient.blood_group}</td>
+                        <td>
+                            <button className="btn btn-primary m-2" onClick={() =>{}}>Update</button>
+                            <button className="btn btn-danger" onClick={() =>{}}>Delete</button>
+                        </td>
+                    </tr>
+                ))}
                 </tbody>
             </table>
-            <br />
-            <button className="btn btn-success" onClick={() => setShowAddPatient(true)}>Add New Patient</button>
+            <button className="btn btn-success" onClick={() => setShowAddPatient(true)}>
+                Add New Patient
+            </button>
             <br></br>
-            <br></br>
-            {showAddPatient && <AddPatient handleCancelBtn={handleCancelBtn} />}
-        </div >
+            {showAddPatient && <AddPatient handleCancelBtn={handleCancelBtn} refreshPatients={fetchPatients}/>}
+        </div>
     )
 }
-export default PatientList
