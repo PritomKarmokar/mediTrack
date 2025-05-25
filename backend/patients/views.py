@@ -72,36 +72,36 @@ class PatientsRetrieveUpdateDeleteAPIView(APIView):
         patient = Patient.get_active_patient_info(id=patient_id)
 
         if patient is None:
-            respone = {
+            response = {
                 "message": f"Patient with the following Id {patient_id} doesn't exist"
             }
-            return Response(data=respone, status=status.HTTP_404_NOT_FOUND)
+            return Response(data=response, status=status.HTTP_404_NOT_FOUND)
         
         if not first_name and not last_name and not blood_group:
-            respone = {
+            response = {
                 "message": "first_name, last_name or blood_group is required. All values cannot be empty"
             }
-            return Response(data=respone, status=status.HTTP_400_BAD_REQUEST)
+            return Response(data=response, status=status.HTTP_400_BAD_REQUEST)
         else:
             _ = patient.update_model(first_name, last_name, blood_group)
-            respone = {
-                "messsage": f"Patient info with Id {patient_id} updated successfully"
+            response = {
+                "message": f"Patient info with Id {patient_id} updated successfully"
             }
-            return Response(data=respone, status=status.HTTP_200_OK)
+            return Response(data=response, status=status.HTTP_200_OK)
         
     def delete(self, request: Request, patient_id: int) -> Response:
         patient = Patient.get_active_patient_info(id=patient_id)
         if patient is None:
-            respone = {
+            response = {
                 "message": f"Patient with the following Id {patient_id} doesn't exist"
             }
-            return Response(data=respone, status=status.HTTP_404_NOT_FOUND)
+            return Response(data=response, status=status.HTTP_404_NOT_FOUND)
         
         patient.is_active = False
         patient.deleted_at = timezone.now()
         patient.save()
 
-        respone = {
+        response = {
             "message" : "Patient Info deleted successfully"
         }
-        return Response(data=respone, status=status.HTTP_204_NO_CONTENT)
+        return Response(data=response, status=status.HTTP_204_NO_CONTENT)
