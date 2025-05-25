@@ -46,7 +46,7 @@ class PatientsListCreateAPIView(APIView):
 class PatientsRetrieveUpdateDeleteAPIView(APIView):
     serializer_class = PatientSerializer
 
-    def get(self, request: Request, patient_id: int) -> Response:
+    def get(self, request: Request, patient_id: str) -> Response:
         patient = Patient.get_active_patient_info(id=patient_id)
 
         if patient is None:
@@ -64,7 +64,7 @@ class PatientsRetrieveUpdateDeleteAPIView(APIView):
         
         
     
-    def patch(self, request: Request, patient_id: int) -> Response:
+    def put(self, request: Request, patient_id: str) -> Response:
         first_name = request.data.get("first_name", None)
         last_name = request.data.get("last_name", None)
         blood_group = request.data.get("blood_group", None)
@@ -89,7 +89,7 @@ class PatientsRetrieveUpdateDeleteAPIView(APIView):
             }
             return Response(data=response, status=status.HTTP_200_OK)
         
-    def delete(self, request: Request, patient_id: int) -> Response:
+    def delete(self, request: Request, patient_id: str) -> Response:
         patient = Patient.get_active_patient_info(id=patient_id)
         if patient is None:
             response = {
